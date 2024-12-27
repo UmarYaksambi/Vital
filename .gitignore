@@ -1,0 +1,42 @@
+# Python-related
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.env
+*.venv
+env/
+venv/
+ENV/
+.Python
+*.sqlite3
+
+# Virtual environment
+.env/
+.env
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints
+
+# Logs
+*.log
+*.out
+*.err
+
+# IDE Files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Streamlit Caches
+.streamlit/
+.stcache_data/
+.stlogger/
+
+# FastAPI-related
+*.db
+*.sqlite
