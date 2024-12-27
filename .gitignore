@@ -13,7 +13,7 @@ ENV/
 
 # Virtual environment
 .vitalenv/
-.vitalenv
+vitalenv/
 
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints
