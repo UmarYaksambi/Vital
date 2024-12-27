@@ -3,11 +3,12 @@ import flwr as fl
 import torch
 from torch.utils.data import DataLoader, Dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
+from peft import get_peft_model, LoraConfig
+from peft import PeftModel
 
 # Load BioMistral model and tokenizer
-tokenizer = AutoTokenizer.from_pretrained("BioMistral/BioMistral-7B")
-model = AutoModelForCausalLM.from_pretrained("BioMistral/BioMistral-7B")
+tokenizer = AutoTokenizer.from_pretrained("BioMistral/BioMistral-7B-AWQ-QGS128-W4-GEMM")
+model = AutoModelForCausalLM.from_pretrained("BioMistral/BioMistral-7B-AWQ-QGS128-W4-GEMM")
 
 # ---------------------------
 # 1. Load Local Patient Data
@@ -84,13 +85,22 @@ class MedicalDataset(Dataset):
 # ---------------------------
 class HealthcareClient(fl.client.NumPyClient):
     def __init__(self, model):
-        self.model = model
+        # Apply LoRA (Low-Rank Adaptation) to the model for PEFT
+        self.lora_config = LoraConfig(
+            r=8,  # rank of the low-rank matrices
+            lora_alpha=32,
+            target_modules=["q_proj", "v_proj"],  # Target attention layers
+            lora_dropout=0.1,
+            bias="none",
+        )
+        self.model = get_peft_model(model, self.lora_config)  # Apply PEFT (LoRA)
         self.local_data = load_local_data()
         self.train_examples = prepare_training_data(self.local_data)
         self.inputs, self.labels = tokenize_data(self.train_examples)
         self.dataset = MedicalDataset(self.inputs, self.labels)
 
     def get_parameters(self):
+        # Return the PEFT model's parameters (LoRA layers)
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):
@@ -125,6 +135,6 @@ class HealthcareClient(fl.client.NumPyClient):
 # 5. Start FL Client and Connect to Server
 # ---------------------------
 fl.client.start_numpy_client(
-    server_address="192.168.X.X:8080",  # Replace with your server's IP
+    server_address="localhost:8080",  # Replace with your server's IP
     client=HealthcareClient(model),
 )
