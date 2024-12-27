@@ -12,8 +12,8 @@ ENV/
 *.sqlite3
 
 # Virtual environment
-.env/
-.env
+.vitalenv/
+.vitalenv
 
 # Jupyter Notebook Checkpoints
 .ipynb_checkpoints
